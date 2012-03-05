@@ -1,8 +1,8 @@
 Use of Rest APIs is a common pattern to Android applications. Many applications use Android's builtin HttpClient library by default, and Google Gson library to convert raw JSON response to Java Objects. The Spring Android framework has a module RestTemplate that provides a ready-to-use RestClient.
 
-To test Rest based Android applications in isolation, we can provite a custom RequestFactory, that overrides default RestTemplate behavior. This way, we can test-driven develop an entire Android Application, even when server-side counterpart does not yet exist.
+To test Rest based Android applications in isolation, we can provide a custom RequestFactory, that overrides default RestTemplate behavior. This way, we can test-driven develop an entire Android Application, even when server-side counterpart does not yet exist.
 
-This is a sample project of FakeWeb-Android (https://github.com/fabiolnm/FakeWeb-Android-Project) and below there are instructions on how to build a project from scratch using it.
+This is a sample project using FakeWeb-Android (https://github.com/fabiolnm/FakeWeb-Android-Project) and below there are instructions on how to build a project from scratch using it.
 
 
 # Instructions
@@ -34,7 +34,7 @@ This is a sample project of FakeWeb-Android (https://github.com/fabiolnm/FakeWeb
 	<dependency>
        		<groupId>fakeweb-android</groupId>
           	<artifactId>fakeweb-android</artifactId>
-            	<version>0.1.0</version>
+		<version>0.1.0</version>
 	</dependency>
 
 
@@ -118,4 +118,34 @@ This is a sample project of FakeWeb-Android (https://github.com/fabiolnm/FakeWeb
 
 10) Add your activity implementation to make the test pass:
 	
+	public class HelloAndroidActivity extends Activity {
+		private static String TAG = "fakeweb-android-sample";
+
+		private RestTemplate rest;
+
+		@Override
+		public void onCreate(final Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			Log.i(TAG, "onCreate");
+			setContentView(R.layout.main);
+			rest = Util.restTemplate(getIntent());
+
+			final TextView tv = (TextView) findViewById(R.id.sample_text);
+			new AsyncTask<Void, Void, String>() {
+				@Override
+				protected String doInBackground(final Void... params) {
+					// rest is using a fake HttpRequestFactory, URI is irrelevant by now.
+					final String response = rest.getForObject("http://dum.my", String.class);
+
+					runOnUiThread(new Runnable() {
+						public void run() {
+							tv.setText(response);
+						}
+					});
+					return response;
+				}
+			}.execute();
+		}
+...
+	}
 
